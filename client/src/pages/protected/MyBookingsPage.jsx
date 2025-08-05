@@ -46,7 +46,7 @@ const MyBookingsPage = () => {
                             <div className="flex items-center space-x-4">
                                {/* FIX: The placeholder URL needs to be a template literal string `` */}
                                <img 
-                                 src={booking.tourPackage.images[0] || https://picsum.photos/seed/${booking.tourPackage._id}/100/100} 
+                                 src={booking.tourPackage.images[0] || `https://picsum.photos/seed/${booking.tourPackage._id}/100/100`} 
                                  alt={booking.tourPackage.title}
                                  className="w-24 h-24 object-cover rounded-md"
                                 />
@@ -58,7 +58,7 @@ const MyBookingsPage = () => {
                             </div>
                             <div className="text-right">
                                 <p className="font-bold text-lg">${booking.totalAmount}</p>
-                                <span className={px-2 py-1 text-sm font-semibold rounded-full ${getStatusColor(booking.status)}}>
+                                <span className={`px-2 py-1 text-sm font-semibold rounded-full ${getStatusColor(booking.status)}`}>
                                     {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                                 </span>
                             </div>

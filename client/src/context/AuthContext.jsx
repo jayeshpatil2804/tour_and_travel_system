@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import api from '../api/api'; // Use the centralized api instance
+import api from '../api/api'; // Corrected import path
 
 const AuthContext = createContext(null);
 
@@ -8,7 +8,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {

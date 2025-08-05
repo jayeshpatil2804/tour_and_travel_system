@@ -12,7 +12,7 @@ const Button = ({ children, onClick, type = 'button', variant = 'primary' }) => 
     <button
       type={type}
       onClick={onClick}
-      className={${baseStyle} ${variants[variant]}}
+      className={`${baseStyle} ${variants[variant]}`}
     >
       {children}
     </button>

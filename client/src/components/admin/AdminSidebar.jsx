@@ -12,13 +12,13 @@ const AdminSidebar = () => {
                 <ul>
                     {/* FIX: The entire className string must be wrapped in backticks `` */}
                     <li>
-                        <NavLink to="/admin" end className={({isActive}) => block p-4 ${isActive ? activeLink : normalLink}}>Dashboard</NavLink>
+                        <NavLink to="/admin" end className={({isActive}) => `block p-4 ${isActive ? activeLink : normalLink}`}>Dashboard</NavLink>
                     </li>
                     <li>
-                        <NavLink to="/admin/tours" className={({isActive}) => block p-4 ${isActive ? activeLink : normalLink}}>Manage Tours</NavLink>
+                        <NavLink to="/admin/tours" className={({isActive}) => `block p-4 ${isActive ? activeLink : normalLink}`}>Manage Tours</NavLink>
                     </li>
                     <li>
-                        <NavLink to="/admin/bookings" className={({isActive}) => block p-4 ${isActive ? activeLink : normalLink}}>Manage Bookings</NavLink>
+                        <NavLink to="/admin/bookings" className={({isActive}) => `block p-4 ${isActive ? activeLink : normalLink}`}>Manage Bookings</NavLink>
                     </li>
                 </ul>
             </nav>

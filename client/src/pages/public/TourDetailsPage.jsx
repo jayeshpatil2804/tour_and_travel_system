@@ -20,7 +20,7 @@ const TourDetailsPage = () => {
       try {
         setLoading(true);
         // FIX: The URL needs to be a template literal string ``
-        const { data } = await api.get(/tours/${id});
+        const { data } = await api.get(`/tours/${id}`);
         setTour(data);
       } catch (err) {
         setError('Failed to fetch tour details.');
@@ -59,7 +59,7 @@ const TourDetailsPage = () => {
     <div className="container mx-auto px-6 py-8">
       <div className="grid md:grid-cols-2 gap-10">
         <div>
-          <img src={tour.images[0] || https://picsum.photos/seed/${tour._id}/800/600} alt={tour.title} className="w-full h-auto rounded-lg shadow-lg" />
+          <img src={tour.images[0] || `https://picsum.photos/seed/${tour._id}/800/600`} alt={tour.title} className="w-full h-auto rounded-lg shadow-lg" />
         </div>
         <div className="flex flex-col justify-between">
           <div>

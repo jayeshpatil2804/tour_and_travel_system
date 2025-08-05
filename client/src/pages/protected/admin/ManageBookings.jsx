@@ -20,7 +20,7 @@ const ManageBookings = () => {
     const handleStatusChange = async (id, status) => {
         try {
             // FIX: The URL needs to be a template literal string ``
-            const { data } = await api.put(/bookings/${id}/status, { status });
+            const { data } = await api.put(`/bookings/${id}/status`, { status });
             setBookings(bookings.map(b => (b._id === id ? data : b)));
         } catch (error) {
             alert('Failed to update status');

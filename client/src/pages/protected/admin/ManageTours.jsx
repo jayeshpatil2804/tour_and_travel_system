@@ -25,7 +25,7 @@ const ManageTours = () => {
         if (window.confirm('Are you sure you want to delete this tour?')) {
             try {
                 // FIX: The URL needs to be a template literal string ``
-                await api.delete(/tours/${id});
+                await api.delete(`/tours/${id}`);
                 setTours(tours.filter(tour => tour._id !== id));
                 alert('Tour deleted successfully');
             } catch (error) {

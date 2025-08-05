@@ -42,7 +42,7 @@ const TourForm = ({ tour, onFormSubmit, onCancel }) => {
       let response;
       if (tour) {
         // Update existing tour
-        response = await api.put(/tours/${tour._id}, tourData);
+        response = await api.put(`/tours/${tour._id}`, tourData);
       } else {
         // Create new tour
         response = await api.post('/tours', tourData);
