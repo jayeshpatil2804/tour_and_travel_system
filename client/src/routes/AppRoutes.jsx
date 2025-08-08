@@ -4,7 +4,8 @@ import { Routes, Route } from 'react-router-dom';
 // Public Pages
 import HomePage from '../pages/public/HomePage';
 import ToursPage from '../pages/public/ToursPage';
-import TourDetailsPage from '../pages/public/TourDetailsPage';
+import EnhancedTourDetailsPage from '../pages/public/EnhancedTourDetailsPage';
+import BookingConfirmationPage from '../pages/public/BookingConfirmationPage';
 import LoginPage from '../pages/public/LoginPage';
 import RegisterPage from '../pages/public/RegisterPage';
 
@@ -27,7 +28,8 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/tours" element={<ToursPage />} />
-      <Route path="/tours/:id" element={<TourDetailsPage />} />
+      <Route path="/tours/:id" element={<EnhancedTourDetailsPage />} />
+      <Route path="/booking-confirmation" element={<BookingConfirmationPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 

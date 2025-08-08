@@ -8,7 +8,14 @@ import TourPackage from '../models/TourPackage.js';
  * @access  Private
  */
 export const createBooking = asyncHandler(async (req, res) => {
-  const { tourPackageId, numberOfGuests } = req.body;
+  const { 
+    tourPackageId, 
+    numberOfGuests, 
+    tourDate,
+    customerInfo,
+    specialRequests,
+    emergencyContact
+  } = req.body;
   
   const tour = await TourPackage.findById(tourPackageId);
   if (!tour) {
@@ -16,16 +23,51 @@ export const createBooking = asyncHandler(async (req, res) => {
       throw new Error('Tour package not found');
   }
 
+  // Check if tour date is available
+  if (tour.availableDates && tour.availableDates.length > 0) {
+    const isDateAvailable = tour.availableDates.some(date => 
+      new Date(date).toDateString() === new Date(tourDate).toDateString()
+    );
+    if (!isDateAvailable) {
+      res.status(400);
+      throw new Error('Selected tour date is not available');
+    }
+  }
+
+  // Check available seats
+  if (tour.availableSeats && tour.availableSeats < numberOfGuests) {
+    res.status(400);
+    throw new Error('Not enough available seats for this tour');
+  }
+
   const totalAmount = tour.price * numberOfGuests;
+  
+  // Generate unique booking reference
+  const bookingReference = `TRV-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
   const booking = new Booking({
     user: req.user._id,
     tourPackage: tourPackageId,
     numberOfGuests,
+    tourDate,
     totalAmount,
+    customerInfo,
+    specialRequests,
+    emergencyContact,
+    bookingReference
   });
 
   const createdBooking = await booking.save();
+  
+  // Update available seats
+  if (tour.availableSeats) {
+    tour.availableSeats -= numberOfGuests;
+    await tour.save();
+  }
+
+  // Populate the response with tour details
+  await createdBooking.populate('tourPackage', 'title location images price');
+  
   res.status(201).json(createdBooking);
 });
 

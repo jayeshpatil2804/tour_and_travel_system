@@ -7,7 +7,20 @@ import TourPackage from '../models/TourPackage.js';
  * @access  Private/Admin
  */
 export const createTour = asyncHandler(async (req, res) => {
-  const { title, description, location, price, duration, maxGroupSize, images } = req.body;
+  const { 
+    title, 
+    description, 
+    location, 
+    price, 
+    duration, 
+    maxGroupSize, 
+    images,
+    transportType,
+    departureTime,
+    availableSeats,
+    amenities,
+    featured
+  } = req.body;
 
   const tour = new TourPackage({
     title,
@@ -17,6 +30,12 @@ export const createTour = asyncHandler(async (req, res) => {
     duration,
     maxGroupSize,
     images,
+    transportType,
+    departureTime,
+    availableSeats,
+    amenities,
+    featured,
+    popularity: 0, // Initialize popularity to 0
   });
 
   const createdTour = await tour.save();
@@ -55,7 +74,21 @@ export const getTourById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 export const updateTour = asyncHandler(async (req, res) => {
-  const { title, description, location, price, duration, maxGroupSize, images } = req.body;
+  const { 
+    title, 
+    description, 
+    location, 
+    price, 
+    duration, 
+    maxGroupSize, 
+    images,
+    transportType,
+    departureTime,
+    availableSeats,
+    amenities,
+    featured,
+    popularity
+  } = req.body;
   const tour = await TourPackage.findById(req.params.id);
 
   if (tour) {
@@ -66,6 +99,12 @@ export const updateTour = asyncHandler(async (req, res) => {
     tour.duration = duration || tour.duration;
     tour.maxGroupSize = maxGroupSize || tour.maxGroupSize;
     tour.images = images || tour.images;
+    tour.transportType = transportType || tour.transportType;
+    tour.departureTime = departureTime || tour.departureTime;
+    tour.availableSeats = availableSeats !== undefined ? availableSeats : tour.availableSeats;
+    tour.amenities = amenities || tour.amenities;
+    tour.featured = featured !== undefined ? featured : tour.featured;
+    tour.popularity = popularity !== undefined ? popularity : tour.popularity;
 
     const updatedTour = await tour.save();
     res.json(updatedTour);

@@ -1,11 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const TourCard = ({ tour }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 ease-in-out">
-      {/* FIX: The placeholder URL needs to be a template literal string `` */}
-      <img src={tour.images[0] || `https://picsum.photos/seed/${tour._id}/400/300`} alt={tour.title} className="w-full h-56 object-cover" />
+      <img 
+        src={tour.images?.[0] || `https://picsum.photos/seed/${tour._id}/400/300`} 
+        alt={tour.title || 'Tour image'} 
+        className="w-full h-56 object-cover"
+        onError={(e) => {
+          e.target.src = `https://picsum.photos/seed/${tour._id}/400/300`;
+        }}
+      />
       <div className="p-5">
         <h3 className="text-xl font-bold text-gray-900 truncate">{tour.title}</h3>
         <p className="text-gray-600 mt-1">{tour.location}</p>
@@ -21,4 +28,15 @@ const TourCard = ({ tour }) => {
   );
 };
 
-export default TourCard;
+TourCard.propTypes = {
+  tour: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    location: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    duration: PropTypes.number.isRequired,
+    images: PropTypes.array
+  }).isRequired
+};
+
+export default React.memo(TourCard);

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
+import { jwtDecode } from 'jwt-decode'; // Import jwtDecode here
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -14,9 +15,17 @@ const LoginPage = () => {
         e.preventDefault();
         setError('');
         try {
-            const { data } = await axios.post('/auth/login', { email, password });
+            const { data } = await api.post('/auth/login', { email, password });
             login(data.token);
-            navigate('/');
+
+            // FIX: Add smart redirection based on user role
+            const decodedToken = jwtDecode(data.token);
+            if (decodedToken.role === 'admin') {
+                navigate('/admin'); // Redirect admins to the dashboard
+            } else {
+                navigate('/profile'); // Redirect regular users to their profile
+            }
+
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
         }

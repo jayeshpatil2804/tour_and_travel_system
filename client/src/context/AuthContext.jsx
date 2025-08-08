@@ -8,32 +8,37 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  // 1. Add state for the token itself
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
+    if (token) {
       try {
-        const decodedUser = jwtDecode(storedToken);
+        const decodedUser = jwtDecode(token);
         setUser(decodedUser);
       } catch (error) {
         localStorage.removeItem('token');
+        setToken(null);
         setUser(null);
       }
     }
-  }, []);
+  }, [token]);
 
   const login = (newToken) => {
     localStorage.setItem('token', newToken);
+    setToken(newToken); // Update token state
     const decodedUser = jwtDecode(newToken);
     setUser(decodedUser);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    setToken(null); // Clear token state
     setUser(null);
   };
 
-  const value = { user, login, logout };
+  // 2. Provide the token in the context value
+  const value = { user, token, login, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

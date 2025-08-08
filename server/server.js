@@ -8,6 +8,13 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import tourRoutes from './routes/tourRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+// In your routes file
+import EnhancedTourDetailsPage from '../pages/public/EnhancedTourDetailsPage';
+import BookingConfirmationPage from '../pages/public/BookingConfirmationPage';
+
+// Add these routes
+
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +36,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/tours', tourRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/users', userRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

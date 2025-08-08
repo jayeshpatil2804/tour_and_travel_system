@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/api'; // Import the custom api instance
 import { useAuth } from '../../context/AuthContext';
 
 const RegisterPage = () => {
@@ -20,7 +20,8 @@ const RegisterPage = () => {
         }
         setError('');
         try {
-            const { data } = await axios.post('/auth/register', { name, email, password });
+            // FIX: Use the 'api' instance for the request
+            const { data } = await api.post('/auth/register', { name, email, password });
             login(data.token);
             navigate('/');
         } catch (err) {
