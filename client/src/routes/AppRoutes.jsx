@@ -6,7 +6,6 @@ import HomePage from '../pages/public/HomePage';
 import ToursPage from '../pages/public/ToursPage';
 import EnhancedTourDetailsPage from '../pages/public/EnhancedTourDetailsPage';
 import BookingConfirmationPage from '../pages/public/BookingConfirmationPage';
-import ContactPage from '../pages/public/ContactPage';
 import LoginPage from '../pages/public/LoginPage';
 import RegisterPage from '../pages/public/RegisterPage';
 
@@ -36,7 +35,6 @@ const AppRoutes = () => {
       <Route path="/tours" element={<ToursPage />} />
       <Route path="/tours/:id" element={<EnhancedTourDetailsPage />} />
       <Route path="/booking-confirmation" element={<BookingConfirmationPage />} />
-      <Route path="/contact" element={<ContactPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/admin-login" element={<AdminLoginPage />} />

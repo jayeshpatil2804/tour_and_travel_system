@@ -14,13 +14,13 @@ const TourHero = () => {
         <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
           <div className="space-y-4 sm:space-y-0 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5">
             <a
-              href="#tour-packages"
+              href="#all-tours"
               className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-blue-700 bg-white hover:bg-blue-50 sm:px-8"
             >
               View Tours
             </a>
             <a
-              href="#featured-tours"
+              href="#recommended-tours"
               className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 bg-opacity-60 hover:bg-opacity-70 sm:px-8"
             >
               Featured Packages

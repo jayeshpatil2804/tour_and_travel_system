@@ -30,20 +30,9 @@ const EnhancedTourCard = ({ tour }) => {
 
   // Get the primary image with fallback options
   const getImageSrc = () => {
-    if (imageError) {
-      // If image failed to load, use a location-based fallback
-      const locationKeyword = tour.location.toLowerCase().includes('rajasthan') ? 'rajasthan-palace' :
-                             tour.location.toLowerCase().includes('kerala') ? 'kerala-backwaters' :
-                             tour.location.toLowerCase().includes('goa') ? 'goa-beach' :
-                             tour.location.toLowerCase().includes('himalaya') ? 'himalaya-mountains' :
-                             tour.location.toLowerCase().includes('delhi') ? 'taj-mahal' :
-                             'travel-destination';
-      return `https://images.unsplash.com/photo-1599661046827-dacde6976549?q=80&w=400&h=300&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`;
-    }
-    
     return tour.images && tour.images.length > 0 && tour.images[0] 
       ? tour.images[0] 
-      : `https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=400&h=300&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`;
+      : null;
   };
 
   const handleImageError = () => {
@@ -58,15 +47,26 @@ const EnhancedTourCard = ({ tour }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 ease-in-out">
       <div className="relative">
-        <AutoImageSlider
-          images={tour.images && tour.images.length > 0 ? tour.images : [getImageSrc()]}
-          autoSlideInterval={4000}
-          showNavigation={true}
-          showDots={tour.images && tour.images.length > 1}
-          className="w-full h-56"
-          imageClassName="w-full h-56 object-cover"
-          alt={tour.title}
-        />
+        {tour.images && tour.images.length > 0 ? (
+          <AutoImageSlider
+            images={tour.images}
+            autoSlideInterval={4000}
+            showNavigation={true}
+            showDots={tour.images.length > 1}
+            className="w-full h-56"
+            imageClassName="w-full h-56 object-cover"
+            alt={tour.title}
+          />
+        ) : (
+          <div className="w-full h-56 bg-gray-200 flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="mt-2 text-sm">No Image Available</p>
+            </div>
+          </div>
+        )}
         {/* Transport type badge */}
         <div className="absolute top-3 right-3 flex space-x-2">
           {tour.transportType && tour.transportType.map(type => (

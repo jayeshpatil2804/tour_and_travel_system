@@ -4,20 +4,81 @@ import { useAuth } from '../../context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
+// Error boundary component for Navbar
+class NavbarErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Navbar Error:', error, errorInfo);
+    // Clear potentially corrupted token
+    localStorage.removeItem('token');
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex-shrink-0">
+                <Link to="/" className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                  TravelNest
+                </Link>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+                  Login
+                </Link>
+                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                  Register
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const Navbar = () => {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Safely decode token to check if user is admin
+  // Safely decode token to check if user is admin with enhanced error handling
   let isAdmin = false;
+  let userInfo = null;
+  
   if (token) {
     try {
       const decoded = jwtDecode(token);
+      
+      // Check if token is expired
+      if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+        console.warn('Token expired, clearing...');
+        logout();
+        return null; // Return null to trigger re-render after logout
+      }
+      
       isAdmin = decoded.role === 'admin';
+      userInfo = decoded;
     } catch (error) {
-      console.error('Error decoding token:', error);
+      console.error('Error decoding token, clearing localStorage:', error);
+      // Clear corrupted token and reload
+      localStorage.removeItem('token');
+      window.location.reload();
+      return null;
     }
   }
 
@@ -31,28 +92,28 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/', label: 'Home' },
-    { path: '/tours', label: 'Tours' },
-    { path: '/contact', label: 'Contact' }
+    { path: '/tours', label: 'Tours' }
   ];
 
   return (
-    <nav className="bg-white shadow sticky top-0 z-50">
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <div>
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              TravelNest
-            </Link>
-          </div>
+    <NavbarErrorBoundary>
+      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Link to="/" className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                TravelNest
+              </Link>
+            </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <div key={link.path}>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              {navLinks.map((link) => (
                 <Link
+                  key={link.path}
                   to={link.path}
-                  className={`font-medium ${
+                  className={`px-3 py-2 text-sm font-medium transition-colors ${
                     isActiveLink(link.path)
                       ? 'text-blue-600 border-b-2 border-blue-600'
                       : 'text-gray-700 hover:text-blue-600'
@@ -60,149 +121,150 @@ const Navbar = () => {
                 >
                   {link.label}
                 </Link>
-              </div>
-            ))}
-            
-            {/* Auth Links */}
-            <div className="flex items-center space-x-4">
-              {token ? (
-                <>
-                  {isAdmin && (
-                    <div>
-                      <Link to="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
+              ))}
+              
+              {/* Auth Links */}
+              <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-gray-200">
+                {token ? (
+                  <>
+                    {isAdmin && (
+                      <Link 
+                        to="/admin" 
+                        className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                      >
                         Admin
                       </Link>
-                    </div>
-                  )}
-                  <div>
-                    <Link to="/my-bookings" className="text-gray-700 hover:text-blue-600 font-medium">
+                    )}
+                    <Link 
+                      to="/my-bookings" 
+                      className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                    >
                       My Bookings
                     </Link>
-                  </div>
-                  <div>
-                    <Link to="/profile" className="text-gray-700 hover:text-blue-600 font-medium">
+                    <Link 
+                      to="/profile" 
+                      className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                    >
                       Profile
                     </Link>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-600 text-white px-6 py-2 rounded font-medium hover:bg-red-700"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div>
+                    <button
+                      onClick={handleLogout}
+                      className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
                     <Link
                       to="/login"
-                      className="text-gray-700 hover:text-blue-600 font-medium"
+                      className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                     >
                       Login
                     </Link>
-                  </div>
-                  <div>
                     <Link
                       to="/register"
-                      className="border-2 border-blue-600 text-blue-600 px-6 py-2 rounded font-medium hover:bg-blue-600 hover:text-white"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
                     >
                       Register
                     </Link>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-gray-700 hover:text-blue-600 p-2 transition-colors"
+              >
+                {isMobileMenuOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
+                ) : (
+                  <Bars3Icon className="h-6 w-6" />
+                )}
+              </button>
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-700 hover:text-blue-600 p-2"
-            >
-              {isMobileMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
-              ) : (
-                <Bars3Icon className="h-6 w-6" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div
-          className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}
-        >
-          <div className="py-4 space-y-4 border-t border-gray-200">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block py-2 font-medium transition-colors duration-300 ${
-                  isActiveLink(link.path)
-                    ? 'text-blue-600'
-                    : 'text-gray-700 hover:text-blue-600'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            
-            {token ? (
-              <>
-                {isAdmin && (
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-100">
+              <div className="py-4 space-y-2">
+                {navLinks.map((link) => (
                   <Link
-                    to="/admin"
+                    key={link.path}
+                    to={link.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block py-2 text-gray-700 hover:text-blue-600 font-medium"
+                    className={`block px-3 py-2 text-sm font-medium transition-colors ${
+                      isActiveLink(link.path)
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
                   >
-                    Admin
+                    {link.label}
                   </Link>
-                )}
-                <Link
-                  to="/my-bookings"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-2 text-gray-700 hover:text-blue-600 font-medium"
-                >
-                  My Bookings
-                </Link>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-2 text-gray-700 hover:text-blue-600 font-medium"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left py-2 text-red-600 hover:text-red-700 font-medium"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="space-y-3 pt-4">
-                <Link
-                  to="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full text-center bg-blue-600 text-white py-3 rounded font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full text-center border-2 border-blue-600 text-blue-600 py-3 rounded font-medium"
-                >
-                  Register
-                </Link>
+                ))}
+                
+                <div className="pt-4 border-t border-gray-100 mt-4">
+                  {token ? (
+                    <>
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                        >
+                          Admin
+                        </Link>
+                      )}
+                      <Link
+                        to="/my-bookings"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      >
+                        My Bookings
+                      </Link>
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <div className="space-y-2">
+                      <Link
+                        to="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block mx-3 my-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium text-center hover:bg-blue-700 transition-colors"
+                      >
+                        Register
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </NavbarErrorBoundary>
   );
 };
 

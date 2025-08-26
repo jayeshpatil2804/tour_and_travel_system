@@ -14,9 +14,7 @@ const AutoImageSlider = ({
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Ensure we have valid images array
-  const validImages = images && images.length > 0 ? images : [
-    'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=800&h=600&auto=format&fit=crop'
-  ];
+  const validImages = images && images.length > 0 ? images : [];
 
   // Auto-slide functionality
   useEffect(() => {
@@ -79,9 +77,6 @@ const AutoImageSlider = ({
               alt={`${alt} ${index + 1}`}
               className={imageClassName}
               loading="lazy"
-              onError={(e) => {
-                e.target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=800&h=600&auto=format&fit=crop';
-              }}
             />
           </div>
         ))}

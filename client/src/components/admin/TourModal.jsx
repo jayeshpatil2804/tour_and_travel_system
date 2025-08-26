@@ -15,7 +15,7 @@ const TourModal = ({ tour, onSave, onClose }) => {
     featured: false,
     status: 'active',
     maxGroupSize: '',
-    difficulty: 'easy'
+    difficulty: 'Easy'
   });
   const [loading, setLoading] = useState(false);
   const [imageUrls, setImageUrls] = useState(['']);
@@ -38,7 +38,7 @@ const TourModal = ({ tour, onSave, onClose }) => {
         featured: tour.featured || false,
         status: tour.status || 'active',
         maxGroupSize: tour.maxGroupSize || '',
-        difficulty: tour.difficulty || 'easy'
+        difficulty: tour.difficulty || 'Easy'
       });
       setImageUrls(tour.images?.length > 0 ? tour.images : ['']);
       setItineraryItems(tour.itinerary?.length > 0 ? tour.itinerary : [{ day: 1, title: '', description: '' }]);
@@ -126,8 +126,23 @@ const TourModal = ({ tour, onSave, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.location || !formData.price || !formData.duration) {
-      toast.error('Please fill in all required fields');
+    if (!formData.name || !formData.location || !formData.price || !formData.duration || !formData.maxGroupSize) {
+      toast.error('Please fill in all required fields: Name, Location, Price, Duration, and Max Group Size');
+      return;
+    }
+
+    if (isNaN(formData.price) || formData.price <= 0) {
+      toast.error('Price must be a valid positive number');
+      return;
+    }
+
+    if (isNaN(formData.duration) || formData.duration <= 0) {
+      toast.error('Duration must be a valid positive number');
+      return;
+    }
+
+    if (isNaN(formData.maxGroupSize) || formData.maxGroupSize <= 0) {
+      toast.error('Max Group Size must be a valid positive number');
       return;
     }
 
@@ -211,7 +226,7 @@ const TourModal = ({ tour, onSave, onClose }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max Group Size
+                Max Group Size *
               </label>
               <input
                 type="number"
@@ -219,6 +234,7 @@ const TourModal = ({ tour, onSave, onClose }) => {
                 value={formData.maxGroupSize}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
               />
             </div>
 
@@ -232,9 +248,10 @@ const TourModal = ({ tour, onSave, onClose }) => {
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="easy">Easy</option>
-                <option value="moderate">Moderate</option>
-                <option value="challenging">Challenging</option>
+                <option value="Easy">Easy</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Challenging">Challenging</option>
+                <option value="Extreme">Extreme</option>
               </select>
             </div>
           </div>

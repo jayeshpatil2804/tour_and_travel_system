@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import api from '../../api/api';
 import EnhancedTourCard from '../../components/tours/EnhancedTourCard';
 import TourListItem from '../../components/tours/TourListItem';
-
 import TourSort from '../../components/tours/TourSort';
 import ViewToggle from '../../components/tours/ViewToggle';
 import RecommendedTours from '../../components/tours/RecommendedTours';
@@ -17,7 +16,6 @@ const ToursPage = () => {
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [sortOption, setSortOption] = useState('price-low');
-
 
   useEffect(() => {
     const fetchTours = async () => {
@@ -68,7 +66,6 @@ const ToursPage = () => {
         result.sort((a, b) => b.duration - a.duration);
         break;
       case 'popularity':
-        // For demo purposes, we'll just use a random order
         result.sort(() => Math.random() - 0.5);
         break;
       default:
@@ -79,58 +76,67 @@ const ToursPage = () => {
   }, [tours, sortOption]);
   
   if (loading) return <Spinner />;
-  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
+  if (error) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-red-600 text-lg mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div>
+    <div className="min-h-screen bg-white">
       <TourHero />
       
-      <div className="container mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Recommended Tours Section */}
         {tours.length > 0 && (
-          <div>
+          <div id="recommended-tours" className="mb-16">
             <RecommendedTours tours={tours} />
           </div>
         )}
         
         <div id="all-tours">
-          {/* Main content */}
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">All Tours</h2>
-                <p className="text-gray-600 mt-1">
-                  {filteredTours.length} tour{filteredTours.length !== 1 ? 's' : ''} found
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <TourSort sortOption={sortOption} setSortOption={setSortOption} />
-                <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-              </div>
+          {/* Header with Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">All Tours</h2>
+              <p className="text-gray-600 mt-1">
+                {filteredTours.length} tour{filteredTours.length !== 1 ? 's' : ''} available
+              </p>
             </div>
-            
-            {filteredTours.length === 0 ? (
-              <div>
-                <TourEmptyState />
-              </div>
-            ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTours.map((tour, index) => (
-                  <div key={tour._id}>
-                    <EnhancedTourCard tour={tour} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {filteredTours.map((tour, index) => (
-                  <div key={tour._id}>
-                    <TourListItem tour={tour} />
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center space-x-4">
+              <TourSort sortOption={sortOption} setSortOption={setSortOption} />
+              <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+            </div>
           </div>
+          
+          {/* Tours Grid/List */}
+          {filteredTours.length === 0 ? (
+            <TourEmptyState />
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTours.map((tour) => (
+                <div key={tour._id} className="h-full">
+                  <EnhancedTourCard tour={tour} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {filteredTours.map((tour) => (
+                <div key={tour._id}>
+                  <TourListItem tour={tour} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ const ManageTours = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [tourToDelete, setTourToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('title');
   const [filterBy, setFilterBy] = useState('all');
 
   useEffect(() => {
@@ -65,28 +65,39 @@ const ManageTours = () => {
   const handleSaveTour = async (tourData) => {
     try {
       if (editingTour) {
-        const updatedTour = await adminService.updateTour(editingTour._id, tourData);
+        const response = await adminService.updateTour(editingTour._id, tourData);
+        const updatedTour = response.data || response;
         setTours(tours.map(tour => 
           tour._id === editingTour._id ? updatedTour : tour
         ));
         toast.success('Tour updated successfully');
       } else {
-        const newTour = await adminService.createTour(tourData);
-        setTours([...tours, newTour]);
+        const response = await adminService.createTour(tourData);
+        const newTour = response.data || response;
+        setTours([newTour, ...tours]); // Add new tour at the beginning
         toast.success('Tour created successfully');
       }
       setShowModal(false);
       setEditingTour(null);
     } catch (error) {
-      toast.error(editingTour ? 'Failed to update tour' : 'Failed to create tour');
       console.error('Error saving tour:', error);
+      
+      // Extract error message from response
+      let errorMessage = 'Failed to save tour';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
     }
   };
 
   // Filter and sort tours
   const filteredTours = tours
     .filter(tour => {
-      const matchesSearch = tour.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = tour.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            tour.location?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterBy === 'all' || 
                            (filterBy === 'featured' && tour.featured) ||
@@ -96,8 +107,8 @@ const ManageTours = () => {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'name':
-          return a.name?.localeCompare(b.name) || 0;
+        case 'title':
+          return a.title?.localeCompare(b.title) || 0;
         case 'price':
           return (a.price || 0) - (b.price || 0);
         case 'duration':
@@ -140,7 +151,7 @@ const ManageTours = () => {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="name">Sort by Name</option>
+                <option value="title">Sort by Title</option>
                 <option value="price">Sort by Price</option>
                 <option value="duration">Sort by Duration</option>
                 <option value="created">Sort by Created Date</option>
@@ -196,13 +207,27 @@ const ManageTours = () => {
                       <tr key={tour._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <img
-                              className="h-12 w-12 rounded-lg object-cover"
-                              src={tour.images?.[0] || '/placeholder-tour.jpg'}
-                              alt={tour.name}
-                            />
+                            <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-gray-200">
+                              {tour.images && tour.images.length > 0 ? (
+                                <img
+                                  className="h-full w-full object-cover"
+                                  src={tour.images[0]}
+                                  alt={tour.title}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div 
+                                className={`h-full w-full flex items-center justify-center text-xs text-gray-500 ${tour.images && tour.images.length > 0 ? 'hidden' : 'flex'}`}
+                                style={{ display: tour.images && tour.images.length > 0 ? 'none' : 'flex' }}
+                              >
+                                No Image
+                              </div>
+                            </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{tour.name}</div>
+                              <div className="text-sm font-medium text-gray-900">{tour.title}</div>
                               {tour.featured && (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                   ⭐ Featured
@@ -268,7 +293,7 @@ const ManageTours = () => {
         {showDeleteModal && (
           <ConfirmModal
             title="Delete Tour"
-            message={`Are you sure you want to delete "${tourToDelete?.name}"? This action cannot be undone.`}
+            message={`Are you sure you want to delete "${tourToDelete?.title}"? This action cannot be undone.`}
             confirmText="Delete"
             confirmColor="red"
             onConfirm={confirmDelete}

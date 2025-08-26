@@ -230,7 +230,7 @@ const BookingForm = ({ tour, onClose, onSuccess }) => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-semibold text-lg mb-2">{tour.title}</h3>
                 <p className="text-gray-600">{tour.location}</p>
-                <p className="text-2xl font-bold text-blue-600 mt-2">${tour.price} per person</p>
+                <p className="text-2xl font-bold text-blue-600 mt-2">{formatINR(tour.price)} per person</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -295,11 +295,11 @@ const BookingForm = ({ tour, onClose, onSuccess }) => {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-medium">Total Amount:</span>
                   <span className="text-2xl font-bold text-blue-600">
-                    ${totalAmount}
+                    {formatINR(totalAmount)}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  {formData.numberOfGuests} × ${tour.price} per person
+                  {formData.numberOfGuests} × {formatINR(tour.price)} per person
                 </p>
               </div>
             </div>

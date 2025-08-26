@@ -108,11 +108,101 @@ export const getAllTours = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 export const createTour = asyncHandler(async (req, res) => {
   try {
-    const tour = await Tour.create(req.body);
-    res.status(201).json(tour);
+    const {
+      name,
+      title,
+      location,
+      price,
+      duration,
+      description,
+      images,
+      itinerary,
+      inclusions,
+      exclusions,
+      featured,
+      status,
+      maxGroupSize,
+      difficulty
+    } = req.body;
+
+    // Validate required fields
+    const tourTitle = title || name; // Support both 'name' and 'title' from frontend
+    if (!tourTitle || !location || !price || !duration || !maxGroupSize) {
+      res.status(400);
+      throw new Error('Please provide all required fields: title/name, location, price, duration, and maxGroupSize');
+    }
+
+    // Validate numeric fields
+    if (isNaN(price) || price <= 0) {
+      res.status(400);
+      throw new Error('Price must be a valid positive number');
+    }
+
+    if (isNaN(duration) || duration <= 0) {
+      res.status(400);
+      throw new Error('Duration must be a valid positive number');
+    }
+
+    if (isNaN(maxGroupSize) || maxGroupSize <= 0) {
+      res.status(400);
+      throw new Error('Max group size must be a valid positive number');
+    }
+
+    // Check if tour with same title already exists
+    const existingTour = await Tour.findOne({ title: tourTitle });
+    if (existingTour) {
+      res.status(400);
+      throw new Error('A tour with this title already exists');
+    }
+
+    // Prepare tour data with proper field mapping
+    const tourData = {
+      title: tourTitle,
+      location: location.trim(),
+      price: Number(price),
+      duration: Number(duration),
+      maxGroupSize: Number(maxGroupSize),
+      description: description || '',
+      images: Array.isArray(images) && images.length > 0 
+        ? images.filter(img => img && img.trim()) 
+        : [],
+      itinerary: Array.isArray(itinerary) ? itinerary.filter(item => item.title && item.title.trim()) : [],
+      inclusions: Array.isArray(inclusions) ? inclusions.filter(item => item && item.trim()) : [],
+      exclusions: Array.isArray(exclusions) ? exclusions.filter(item => item && item.trim()) : [],
+      featured: Boolean(featured),
+      difficulty: difficulty || 'Easy',
+      rating: 0,
+      reviewCount: 0,
+      popularity: 0,
+      availableSeats: Number(maxGroupSize), // Initialize available seats to max group size
+      transportType: [],
+      amenities: [],
+      availableDates: []
+    };
+
+    const tour = await Tour.create(tourData);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Tour created successfully',
+      data: tour
+    });
   } catch (error) {
+    if (error.code === 11000) {
+      // Handle duplicate key error
+      res.status(400);
+      throw new Error('A tour with this title already exists');
+    }
+    
+    // If it's a validation error from Mongoose
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      res.status(400);
+      throw new Error(`Validation Error: ${validationErrors.join(', ')}`);
+    }
+    
     res.status(400);
-    throw new Error('Failed to create tour');
+    throw new Error(error.message || 'Failed to create tour');
   }
 });
 
@@ -121,9 +211,66 @@ export const createTour = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 export const updateTour = asyncHandler(async (req, res) => {
   try {
+    const {
+      name,
+      title,
+      location,
+      price,
+      duration,
+      description,
+      images,
+      itinerary,
+      inclusions,
+      exclusions,
+      featured,
+      status,
+      maxGroupSize,
+      difficulty
+    } = req.body;
+
+    // Support both 'name' and 'title' from frontend
+    const tourTitle = title || name;
+    
+    // Validate required fields if provided
+    if (tourTitle && !tourTitle.trim()) {
+      res.status(400);
+      throw new Error('Tour title cannot be empty');
+    }
+
+    if (price !== undefined && (isNaN(price) || price <= 0)) {
+      res.status(400);
+      throw new Error('Price must be a valid positive number');
+    }
+
+    if (duration !== undefined && (isNaN(duration) || duration <= 0)) {
+      res.status(400);
+      throw new Error('Duration must be a valid positive number');
+    }
+
+    if (maxGroupSize !== undefined && (isNaN(maxGroupSize) || maxGroupSize <= 0)) {
+      res.status(400);
+      throw new Error('Max group size must be a valid positive number');
+    }
+
+    // Prepare update data with proper field mapping
+    const updateData = {};
+    if (tourTitle) updateData.title = tourTitle.trim();
+    if (location) updateData.location = location.trim();
+    if (price !== undefined) updateData.price = Number(price);
+    if (duration !== undefined) updateData.duration = Number(duration);
+    if (maxGroupSize !== undefined) updateData.maxGroupSize = Number(maxGroupSize);
+    if (description !== undefined) updateData.description = description;
+    if (Array.isArray(images)) updateData.images = images.filter(img => img && img.trim());
+    if (Array.isArray(itinerary)) updateData.itinerary = itinerary.filter(item => item.title && item.title.trim());
+    if (Array.isArray(inclusions)) updateData.inclusions = inclusions.filter(item => item && item.trim());
+    if (Array.isArray(exclusions)) updateData.exclusions = exclusions.filter(item => item && item.trim());
+    if (featured !== undefined) updateData.featured = Boolean(featured);
+    if (status !== undefined) updateData.status = status;
+    if (difficulty !== undefined) updateData.difficulty = difficulty;
+
     const tour = await Tour.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -132,10 +279,25 @@ export const updateTour = asyncHandler(async (req, res) => {
       throw new Error('Tour not found');
     }
 
-    res.json(tour);
+    res.json({
+      success: true,
+      message: 'Tour updated successfully',
+      data: tour
+    });
   } catch (error) {
+    if (error.code === 11000) {
+      res.status(400);
+      throw new Error('A tour with this title already exists');
+    }
+    
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      res.status(400);
+      throw new Error(`Validation Error: ${validationErrors.join(', ')}`);
+    }
+    
     res.status(400);
-    throw new Error('Failed to update tour');
+    throw new Error(error.message || 'Failed to update tour');
   }
 });
 
@@ -203,14 +365,25 @@ export const updateBookingStatus = asyncHandler(async (req, res) => {
       req.params.id,
       { status },
       { new: true }
-    ).populate('user', 'name email').populate('tour', 'name');
+    ).populate('user', 'name email').populate('tourPackage', 'title location');
 
     if (!booking) {
       res.status(404);
       throw new Error('Booking not found');
     }
 
-    res.json(booking);
+    const statusMessages = {
+      'confirmed': 'approved',
+      'completed': 'completed',
+      'cancelled': 'cancelled',
+      'pending': 'set to pending'
+    };
+
+    res.status(200).json({
+      success: true,
+      message: `Booking ${statusMessages[status]} successfully`,
+      booking
+    });
   } catch (error) {
     res.status(400);
     throw new Error('Failed to update booking status');
@@ -230,7 +403,10 @@ export const deleteBooking = asyncHandler(async (req, res) => {
     }
 
     await Booking.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Booking deleted successfully' });
+    res.status(200).json({ 
+      success: true,
+      message: 'Booking deleted successfully' 
+    });
   } catch (error) {
     res.status(400);
     throw new Error('Failed to delete booking');

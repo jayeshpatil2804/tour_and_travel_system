@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../../components/admin/AdminSidebar';
+import AdminHeader from '../../../components/admin/AdminHeader';
 import { adminService } from '../../../services/adminService';
 import { toast } from 'react-hot-toast';
 
@@ -92,127 +93,128 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-140px)]">
+    <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <main className="flex-1 p-8 bg-gray-50">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="mt-2 text-gray-600">Welcome back! Here's what's happening with your travel business.</p>
-        </div>
-        
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <StatCard
-            title="Total Tours"
-            value={stats.totalTours}
-            icon="🏖️"
-            color="text-blue-600"
-            trend={12}
-          />
-          <StatCard
-            title="Total Bookings"
-            value={stats.totalBookings}
-            icon="📋"
-            color="text-green-600"
-            trend={8}
-          />
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers}
-            icon="👥"
-            color="text-purple-600"
-            trend={15}
-          />
-          <StatCard
-            title="Pending Bookings"
-            value={stats.pendingBookings}
-            icon="⏳"
-            color="text-orange-600"
-          />
-          <StatCard
-            title="Total Revenue"
-            value={`₹${stats.totalRevenue?.toLocaleString() || 0}`}
-            icon="💰"
-            color="text-emerald-600"
-            trend={22}
-          />
-          <StatCard
-            title="Active Users"
-            value={stats.activeUsers}
-            icon="🟢"
-            color="text-indigo-600"
-          />
-        </div>
-
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="animate-pulse flex items-center space-x-3">
-                    <div className="bg-gray-200 h-10 w-10 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="bg-gray-200 h-4 w-3/4 rounded mb-2"></div>
-                      <div className="bg-gray-200 h-3 w-1/2 rounded"></div>
-                    </div>
-                  </div>
-                ))
-              ) : recentActivity.length > 0 ? (
-                recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-md">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <span className="text-blue-600">{activity.icon}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center py-4">No recent activity</p>
-              )}
-            </div>
+      <div className="flex-1">
+        <AdminHeader 
+          title="Dashboard Overview" 
+          subtitle="Welcome back! Here's what's happening with your travel business." 
+        />
+        <main className="p-8">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <StatCard
+              title="Total Tours"
+              value={stats.totalTours}
+              icon="🏖️"
+              color="text-blue-600"
+              trend={12}
+            />
+            <StatCard
+              title="Total Bookings"
+              value={stats.totalBookings}
+              icon="📋"
+              color="text-green-600"
+              trend={8}
+            />
+            <StatCard
+              title="Total Users"
+              value={stats.totalUsers}
+              icon="👥"
+              color="text-purple-600"
+              trend={15}
+            />
+            <StatCard
+              title="Pending Bookings"
+              value={stats.pendingBookings}
+              icon="⏳"
+              color="text-orange-600"
+            />
+            <StatCard
+              title="Total Revenue"
+              value={`₹${stats.totalRevenue?.toLocaleString() || 0}`}
+              icon="💰"
+              color="text-emerald-600"
+              trend={22}
+            />
+            <StatCard
+              title="Active Users"
+              value={stats.activeUsers}
+              icon="🟢"
+              color="text-indigo-600"
+            />
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={() => navigate('/admin/tours')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200 text-center"
-              >
-                <div className="text-2xl mb-2">➕</div>
-                <div className="text-sm font-medium">Add New Tour</div>
-              </button>
-              <button 
-                onClick={() => navigate('/admin/analytics')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors duration-200 text-center"
-              >
-                <div className="text-2xl mb-2">📊</div>
-                <div className="text-sm font-medium">View Reports</div>
-              </button>
-              <button 
-                onClick={() => navigate('/admin/users')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors duration-200 text-center"
-              >
-                <div className="text-2xl mb-2">👤</div>
-                <div className="text-sm font-medium">Manage Users</div>
-              </button>
-              <button 
-                onClick={() => navigate('/admin/settings')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors duration-200 text-center"
-              >
-                <div className="text-2xl mb-2">⚙️</div>
-                <div className="text-sm font-medium">Settings</div>
-              </button>
+          {/* Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+              <div className="space-y-4">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="animate-pulse flex items-center space-x-3">
+                      <div className="bg-gray-200 h-10 w-10 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="bg-gray-200 h-4 w-3/4 rounded mb-2"></div>
+                        <div className="bg-gray-200 h-3 w-1/2 rounded"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-md">
+                      <div className="bg-blue-100 p-2 rounded-full">
+                        <span className="text-blue-600">{activity.icon}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                        <p className="text-xs text-gray-500">{activity.time}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No recent activity</p>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={() => navigate('/admin/tours')}
+                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200 text-center"
+                >
+                  <div className="text-2xl mb-2">➕</div>
+                  <div className="text-sm font-medium">Add New Tour</div>
+                </button>
+                <button 
+                  onClick={() => navigate('/admin/analytics')}
+                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors duration-200 text-center"
+                >
+                  <div className="text-2xl mb-2">📊</div>
+                  <div className="text-sm font-medium">View Reports</div>
+                </button>
+                <button 
+                  onClick={() => navigate('/admin/users')}
+                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors duration-200 text-center"
+                >
+                  <div className="text-2xl mb-2">👤</div>
+                  <div className="text-sm font-medium">Manage Users</div>
+                </button>
+                <button 
+                  onClick={() => navigate('/admin/settings')}
+                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors duration-200 text-center"
+                >
+                  <div className="text-2xl mb-2">⚙️</div>
+                  <div className="text-sm font-medium">Settings</div>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
